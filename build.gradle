@@ -1,0 +1,67 @@
+plugins {
+    id 'org.pistonmc.build' version '0.1-SNAPSHOT'
+    id 'idea'
+}
+
+
+import org.pistonmc.build.gradle.run.DataRunConfig
+import org.pistonmc.build.gradle.run.forge.ForgeClient
+import org.pistonmc.build.gradle.run.forge.ForgeData
+import org.pistonmc.build.gradle.run.forge.ForgeRunConfig
+import org.pistonmc.build.gradle.run.forge.ForgeServer
+
+group = 'cn.maxpixel.mods'
+base.archivesName = mod_id
+version = mod_version
+
+minecraft {
+    version = minecraft_version
+    mappings = official()
+    toolchains {
+        forge {
+            version = forge_version
+        }
+    }
+    runs {
+        withType(ForgeRunConfig).configureEach {
+            properties.put('forge.logging.markers', 'REGISTRIES')
+            properties.put('forge.logging.console.level', 'debug')
+            properties.put('forge.enabledGameTestNamespaces', mod_id)
+        }
+        client(ForgeClient) {
+        }
+        server(ForgeServer) {
+            nogui()
+        }
+        data(ForgeData) {
+            gameArguments.addAll('--mod', mod_id, '--existing', file('src/forge/resources/').absolutePath)
+            include(DataRunConfig.IncludeType.ALL)
+            output(file('src/generated/resources/').absolutePath)
+        }
+    }
+}
+
+tasks.named(sourceSets.forge.getProcessResourcesTaskName(), ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version    : forge_version, forge_version_range: forge_version_range,
+            loader_version_range: fml_version_range,
+            mod_id           : mod_id, mod_name: mod_name, mod_version: mod_version,
+    ]
+
+    inputs.properties replaceProperties
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+//dependencies {
+//    testImplementation platform('org.junit:junit-bom:5.9.1')
+//    testImplementation 'org.junit.jupiter:junit-jupiter'
+//}
+
+//test {
+//    useJUnitPlatform()
+//}
