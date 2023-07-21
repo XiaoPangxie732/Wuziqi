@@ -28,8 +28,7 @@ minecraft {
             properties.put('forge.logging.console.level', 'debug')
             properties.put('forge.enabledGameTestNamespaces', mod_id)
         }
-        client(ForgeClient) {
-        }
+        client(ForgeClient)
         server(ForgeServer) {
             nogui()
         }
