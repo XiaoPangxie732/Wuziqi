@@ -35,17 +35,23 @@ minecraft {
         data(ForgeData) {
             gameArguments.addAll('--mod', mod_id, '--existing', file('src/forge/resources/').absolutePath)
             include(DataRunConfig.IncludeType.ALL)
-            output(file('src/generated/resources/').absolutePath)
+            output(file('src/forge/generated_resources/').absolutePath)
         }
     }
 }
 
+sourceSets.forge.resources { srcDir 'src/forge/generated_resources' }
+
 tasks.named(sourceSets.forge.getProcessResourcesTaskName(), ProcessResources).configure {
     var replaceProperties = [
-            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version    : forge_version, forge_version_range: forge_version_range,
+            minecraft_version: minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version,
+            forge_version_range: forge_version_range,
             loader_version_range: fml_version_range,
-            mod_id           : mod_id, mod_name: mod_name, mod_version: mod_version,
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
     ]
 
     inputs.properties replaceProperties
@@ -54,6 +60,10 @@ tasks.named(sourceSets.forge.getProcessResourcesTaskName(), ProcessResources).co
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
 }
 
 //dependencies {
