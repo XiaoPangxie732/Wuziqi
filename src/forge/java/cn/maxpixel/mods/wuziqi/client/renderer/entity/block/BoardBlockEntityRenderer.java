@@ -3,6 +3,7 @@ package cn.maxpixel.mods.wuziqi.client.renderer.entity.block;
 import cn.maxpixel.mods.wuziqi.BoardSizeSetting;
 import cn.maxpixel.mods.wuziqi.BoardStore;
 import cn.maxpixel.mods.wuziqi.block.entity.BoardBlockEntity;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,8 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL46;
 
 public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockEntity> {
     public BoardBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
@@ -60,6 +63,8 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder builder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        var depthState = GL46.glGetBoolean(GL46.GL_DEPTH_TEST);
+        if (!depthState) RenderSystem.enableDepthTest();
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         var setting = store.setting;
         for (int i = 1; i <= setting.length; i++) {
@@ -75,6 +80,7 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
             }
         }
         tesselator.end();
+        if (!depthState) RenderSystem.disableDepthTest();
     }
 
     private void renderXSameLine(Matrix4f pose, BufferBuilder consumer, int color, float halfWidth, Vec2 from, Vec2 to, float relateHeight) {

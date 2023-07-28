@@ -37,7 +37,7 @@ public class BoardStore {
     }
 
     public boolean hasPiece(Vec2 pos) {
-        return getSlotPiece(pos).isEmpty;
+        return !getSlotPiece(pos).isEmpty;
     }
 
     public void setPiece(int x, int z, PieceType piece) {
