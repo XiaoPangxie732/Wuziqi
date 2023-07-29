@@ -3,7 +3,6 @@ plugins {
     id 'idea'
 }
 
-
 import org.pistonmc.build.gradle.run.DataRunConfig
 import org.pistonmc.build.gradle.run.forge.ForgeClient
 import org.pistonmc.build.gradle.run.forge.ForgeData
@@ -78,7 +77,7 @@ tasks.named(sourceSets.forge.getProcessResourcesTaskName(), ProcessResources).co
 //}
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = "UTF-8"
+    options.encoding = 'UTF-8'
 }
 
 //dependencies {
