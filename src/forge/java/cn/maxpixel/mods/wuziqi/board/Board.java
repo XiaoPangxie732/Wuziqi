@@ -1,4 +1,4 @@
-package cn.maxpixel.mods.wuziqi.board.wuziqi;
+package cn.maxpixel.mods.wuziqi.board;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -41,6 +41,63 @@ public class Board {
         return checkPieceBounds(x, y) ? pieces[x][y] : null;
     }
 
+    public boolean checkWin(int x, int y) {
+        var type = getPiece(x, y);
+        return type != null && (checkX(x, y, type) || checkY(x, y, type) || checkLeft(x, y, type) || checkRight(x, y, type));
+    }
+
+    private boolean checkX(int x, int y, PieceType type) {
+        int count = 1;
+        for (int i = x - 1; i > x - 5; i--) {
+            if (getPiece(i, y) == type) count++;
+            else break;
+        }
+        for (int i = x + 1; i < x + 5; i++) {
+            if (getPiece(i, y) == type) count++;
+            else break;
+        }
+        return count >= 5;
+    }
+
+    private boolean checkY(int x, int y, PieceType type) {
+        int count = 1;
+        for (int i = y - 1; i > y - 5; i--) {
+            if (getPiece(x, i) == type) count++;
+            else break;
+        }
+        for (int i = y + 1; i < y + 5; i++) {
+            if (getPiece(x, i) == type) count++;
+            else break;
+        }
+        return count >= 5;
+    }
+
+    private boolean checkLeft(int x, int y, PieceType type) {
+        int count = 1;
+        for (int i = -1; i > -5; i--) {
+            if (getPiece(x + i, y - i) == type) count++;
+            else break;
+        }
+        for (int i = 1; i < 5; i++) {
+            if (getPiece(x + i, y - i) == type) count++;
+            else break;
+        }
+        return count >= 5;
+    }
+
+    private boolean checkRight(int x, int y, PieceType type) {
+        int count = 1;
+        for (int i = -1; i > -5; i--) {
+            if (getPiece(x + i, y + i) == type) count++;
+            else break;
+        }
+        for (int i = 1; i < 5; i++) {
+            if (getPiece(x + i, y + i) == type) count++;
+            else break;
+        }
+        return count >= 5;
+    }
+
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
 
@@ -61,11 +118,7 @@ public class Board {
         if (tag.contains(PIECES_KEY, Tag.TAG_BYTE_ARRAY)) {
             byte[] arr = tag.getByteArray(PIECES_KEY);
             for (int i = 0; i < arr.length; i++) {
-                var type = switch (arr[i]) {
-                    case PieceType.CODE_BLACK -> PieceType.BLACK;
-                    case PieceType.CODE_WHITE -> PieceType.WHITE;
-                    default -> null;
-                };
+                var type = PieceType.getFromCode(arr[i]);
                 pieces[i / BOARD_SIZE][i % BOARD_SIZE] = type;
             }
         }

@@ -13,4 +13,8 @@ public abstract class AbstractLangProvider extends LanguageProvider {
     public void addItemGroup(String key, String name) {
         add(I18nUtil.makeItemGroup(key), name);
     }
+
+    public void addScreen(String screen, String key, String name) {
+        add(I18nUtil.makeScreenText(screen, key), name);
+    }
 }

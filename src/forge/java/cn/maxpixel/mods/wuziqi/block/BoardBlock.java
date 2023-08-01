@@ -1,7 +1,10 @@
 package cn.maxpixel.mods.wuziqi.block;
 
-import cn.maxpixel.mods.wuziqi.WuziqiMod;
 import cn.maxpixel.mods.wuziqi.block.entity.BoardBlockEntity;
+import cn.maxpixel.mods.wuziqi.client.screen.PrepareMatchScreen;
+import cn.maxpixel.mods.wuziqi.network.Network;
+import cn.maxpixel.mods.wuziqi.network.serverbound.ServerboundPiecePacket;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -22,6 +25,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class BoardBlock extends BaseEntityBlock {
+    private static final VoxelShape SHAPE = box(1, 0, 1, 15, 2, 15);
+
     public BoardBlock(Properties prop) {
         super(prop);
     }
@@ -40,7 +45,7 @@ public class BoardBlock extends BaseEntityBlock {
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos pos, CollisionContext collisionContext) {
-        return box(1, 0, 1, 15, 2, 15);
+        return SHAPE;
     }
 
     @Override
@@ -51,14 +56,16 @@ public class BoardBlock extends BaseEntityBlock {
     @Override
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (hand == InteractionHand.OFF_HAND) return InteractionResult.PASS;
-        var loc = hitResult.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
-        if (!checkHitLocation(loc)) return InteractionResult.PASS;
+        if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity blockEntity) {
+            if (level.isClientSide && !blockEntity.isMatching()) {
+                Minecraft.getInstance().setScreen(new PrepareMatchScreen(blockEntity));
+                return InteractionResult.SUCCESS;
+            }
+            if (hand == InteractionHand.OFF_HAND) return InteractionResult.PASS;
+            var loc = hitResult.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
+            if (!checkHitLocation(loc)) return InteractionResult.PASS;
+            Network.CHANNEL.sendToServer(new ServerboundPiecePacket(pos, ServerboundPiecePacket.Action.PLACE, (byte) getPos(loc.x), (byte) getPos(loc.z)));
 
-        WuziqiMod.LOGGER.info("hitLocation : x:{}, y:{}, z:{}", loc.x, loc.y, loc.z);
-        if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity boardBlockEntity) {
-            WuziqiMod.LOGGER.info("hit pos x:{}, y:{}", getPos(loc.x), getPos(loc.z));
-//            boardBlockEntity.onHit(hitPos, player);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;

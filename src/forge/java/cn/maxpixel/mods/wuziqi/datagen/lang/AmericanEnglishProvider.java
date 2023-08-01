@@ -1,7 +1,9 @@
 package cn.maxpixel.mods.wuziqi.datagen.lang;
 
+import cn.maxpixel.mods.wuziqi.client.screen.PrepareMatchScreen;
 import cn.maxpixel.mods.wuziqi.registry.BlockRegistry;
 import cn.maxpixel.mods.wuziqi.registry.CreativeModeTabRegistry;
+import cn.maxpixel.mods.wuziqi.util.I18nUtil;
 import net.minecraft.data.PackOutput;
 
 public class AmericanEnglishProvider extends AbstractLangProvider {
@@ -14,5 +16,21 @@ public class AmericanEnglishProvider extends AbstractLangProvider {
         addItemGroup(CreativeModeTabRegistry.GENERAL_NAME, "Wuziqi");
 
         addBlock(BlockRegistry.OAK_BOARD, "Oak board");
+
+        addPrepareMatchScreen();
+        add(I18nUtil.make("block_entity", "board.your_turn"), "You");
+        add(I18nUtil.make("block_entity", "board.opponents_turn"), "Opponent");
+        add(I18nUtil.make("block_entity", "board.status"), "It's the turn for: %s");
+        add(I18nUtil.make("block_entity", "board.win.white"), "White win");
+        add(I18nUtil.make("block_entity", "board.win.black"), "Black win");
+    }
+
+    private void addPrepareMatchScreen() {
+        addScreen(PrepareMatchScreen.SCREEN, "wuziqi", "Wuziqi");
+        addScreen(PrepareMatchScreen.SCREEN, "players", "Players");
+        addScreen(PrepareMatchScreen.SCREEN, "join", "Join");
+        addScreen(PrepareMatchScreen.SCREEN, "quit", "Quit");
+        addScreen(PrepareMatchScreen.SCREEN, "start", "Start");
+        addScreen(PrepareMatchScreen.SCREEN, "start_sp", "Start in singleplayer");
     }
 }

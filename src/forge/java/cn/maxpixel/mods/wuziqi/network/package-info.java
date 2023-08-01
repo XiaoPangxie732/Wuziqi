@@ -1,7 +1,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package cn.maxpixel.mods.wuziqi.board.wuziqi;
+package cn.maxpixel.mods.wuziqi.network;
 
 import cn.maxpixel.mods.wuziqi.annotations.FieldsAreNonnullByDefault;
 import cn.maxpixel.mods.wuziqi.annotations.MethodsReturnNonnullByDefault;

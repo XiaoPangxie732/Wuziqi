@@ -1,4 +1,15 @@
 {
   "block.wuziqi.oak_board": "橡木棋盘",
-  "itemGroup.wuziqi.general": "五子棋"
+  "block_entity.wuziqi.board.opponents_turn": "对手",
+  "block_entity.wuziqi.board.status": "轮到 %s 下棋",
+  "block_entity.wuziqi.board.win.black": "黑方获胜",
+  "block_entity.wuziqi.board.win.white": "白方获胜",
+  "block_entity.wuziqi.board.your_turn": "您",
+  "itemGroup.wuziqi.general": "五子棋",
+  "screen.wuziqi.prepare_match.join": "加入",
+  "screen.wuziqi.prepare_match.players": "玩家",
+  "screen.wuziqi.prepare_match.quit": "退出",
+  "screen.wuziqi.prepare_match.start": "开始",
+  "screen.wuziqi.prepare_match.start_sp": "开始(单人)",
+  "screen.wuziqi.prepare_match.wuziqi": "五子棋"
 }
