@@ -1,10 +1,9 @@
 package cn.maxpixel.mods.wuziqi.block;
 
 import cn.maxpixel.mods.wuziqi.block.entity.BoardBlockEntity;
-import cn.maxpixel.mods.wuziqi.client.screen.PrepareMatchScreen;
+import cn.maxpixel.mods.wuziqi.client.screen.Screens;
 import cn.maxpixel.mods.wuziqi.network.Network;
 import cn.maxpixel.mods.wuziqi.network.serverbound.ServerboundPiecePacket;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -58,7 +57,7 @@ public class BoardBlock extends BaseEntityBlock {
     public InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity blockEntity) {
             if (level.isClientSide && !blockEntity.isMatching()) {
-                Minecraft.getInstance().setScreen(new PrepareMatchScreen(blockEntity));
+                Screens.openPrepareMatchScreen(blockEntity);
                 return InteractionResult.SUCCESS;
             }
             if (hand == InteractionHand.OFF_HAND) return InteractionResult.PASS;

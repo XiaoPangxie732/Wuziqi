@@ -24,16 +24,16 @@ minecraft {
     }
     runs {
         withType(ForgeRunConfig).configureEach {
-            properties.put('terminal.jline', 'true')
             properties.put('forge.logging.markers', 'REGISTRIES')
             properties.put('forge.logging.console.level', 'debug')
             properties.put('forge.enabledGameTestNamespaces', mod_id)
         }
-        client(ForgeClient)
-        server(ForgeServer) {
-            nogui()
+        client(ForgeClient) {
+            properties.put('terminal.jline', 'true')
         }
+        server(ForgeServer)
         data(ForgeData) {
+            properties.put('terminal.jline', 'true')
             gameArguments.addAll('--mod', mod_id, '--existing', file('src/forge/resources/').absolutePath)
             include(DataRunConfig.IncludeType.ALL)
             output(file('src/forge/generated_resources/').absolutePath)
