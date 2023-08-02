@@ -155,7 +155,7 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
 
     private void renderStatus(PoseStack stack, Component component, MultiBufferSource buffer, int packedLight) {
         stack.pushPose();
-        stack.translate(.5f, .5f, .5f);
+        stack.translate(.5f, 1.f, .5f);
         stack.mulPose(context.getEntityRenderer().cameraOrientation());
         stack.scale(-.025f, -.025f, .025f);
         Matrix4f matrix4f = stack.last().pose();

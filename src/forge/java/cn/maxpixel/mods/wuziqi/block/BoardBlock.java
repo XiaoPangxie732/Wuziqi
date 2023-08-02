@@ -24,7 +24,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class BoardBlock extends BaseEntityBlock {
-    private static final VoxelShape SHAPE = box(1, 0, 1, 15, 2, 15);
+    private static final VoxelShape SHAPE = box(1, 0, 1, 15, 1, 15);
 
     public BoardBlock(Properties prop) {
         super(prop);
@@ -55,23 +55,24 @@ public class BoardBlock extends BaseEntityBlock {
     @Override
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (hand == InteractionHand.OFF_HAND) return InteractionResult.PASS;
         if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity blockEntity) {
-            if (level.isClientSide && !blockEntity.isMatching()) {
-                Screens.openPrepareMatchScreen(blockEntity);
-                return InteractionResult.SUCCESS;
+            if (level.isClientSide) {
+                if (!blockEntity.isMatching()) {
+                    Screens.openPrepareMatchScreen(blockEntity);
+                    return InteractionResult.SUCCESS;
+                }
+                var loc = hitResult.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
+                if (!checkHitLocation(loc)) return InteractionResult.PASS;
+                Network.CHANNEL.sendToServer(new ServerboundPiecePacket(pos, ServerboundPiecePacket.Action.PLACE, (byte) getPos(loc.x), (byte) getPos(loc.z)));
             }
-            if (hand == InteractionHand.OFF_HAND) return InteractionResult.PASS;
-            var loc = hitResult.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
-            if (!checkHitLocation(loc)) return InteractionResult.PASS;
-            Network.CHANNEL.sendToServer(new ServerboundPiecePacket(pos, ServerboundPiecePacket.Action.PLACE, (byte) getPos(loc.x), (byte) getPos(loc.z)));
-
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }
 
     public static boolean checkHitLocation(Vec3 loc) {
-        return Mth.equal(loc.y, 2.f / 16.f) && checkHitLocation(loc.x) && checkHitLocation(loc.z);
+        return Mth.equal(loc.y, 1.f / 16.f) && checkHitLocation(loc.x) && checkHitLocation(loc.z);
     }
 
     private static boolean checkHitLocation(double d) {
