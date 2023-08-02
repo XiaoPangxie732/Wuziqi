@@ -6,8 +6,8 @@ pluginManagement {
             name = 'Minecraft Decompiler'
             url = 'https://maven.pkg.github.com/MaxPixelStudios/MinecraftDecompiler'
             credentials {
-                username = System.getenv("GHP_USERNAME")
-                password = System.getenv("GHP_TOKEN")
+                username = System.getenv("GHP_USERNAME") ?: System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GHP_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
             content {
                 includeModule('cn.maxpixel', 'minecraft-decompiler')
@@ -17,8 +17,8 @@ pluginManagement {
             name = 'Piston Gradle'
             url = 'https://maven.pkg.github.com/PistonMinecraft/PistonGradle'
             credentials {
-                username = System.getenv("GHP_USERNAME")
-                password = System.getenv("GHP_TOKEN")
+                username = System.getenv("GHP_USERNAME") ?: System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GHP_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
