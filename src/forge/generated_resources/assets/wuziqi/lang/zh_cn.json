@@ -1,10 +1,8 @@
 {
   "block.wuziqi.oak_board": "橡木棋盘",
-  "block_entity.wuziqi.board.opponents_turn": "对手",
-  "block_entity.wuziqi.board.status": "轮到 %s 下棋",
   "block_entity.wuziqi.board.win.black": "黑方获胜",
   "block_entity.wuziqi.board.win.white": "白方获胜",
-  "block_entity.wuziqi.board.your_turn": "您",
+  "block_entity.wuziqi.board.your_turn": "轮到您落子",
   "itemGroup.wuziqi.general": "五子棋",
   "screen.wuziqi.prepare_match.join": "加入",
   "screen.wuziqi.prepare_match.players": "玩家",

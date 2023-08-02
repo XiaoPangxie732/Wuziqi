@@ -1,10 +1,8 @@
 {
   "block.wuziqi.oak_board": "Oak board",
-  "block_entity.wuziqi.board.opponents_turn": "Opponent",
-  "block_entity.wuziqi.board.status": "It's the turn for: %s",
   "block_entity.wuziqi.board.win.black": "Black win",
   "block_entity.wuziqi.board.win.white": "White win",
-  "block_entity.wuziqi.board.your_turn": "You",
+  "block_entity.wuziqi.board.your_turn": "It's your turn",
   "itemGroup.wuziqi.general": "Wuziqi",
   "screen.wuziqi.prepare_match.join": "Join",
   "screen.wuziqi.prepare_match.players": "Players",
