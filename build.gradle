@@ -3,6 +3,7 @@ plugins {
     id 'idea'
 }
 
+import org.pistonmc.build.gradle.forge.task.ReobfTask
 import org.pistonmc.build.gradle.run.DataRunConfig
 import org.pistonmc.build.gradle.run.forge.ForgeClient
 import org.pistonmc.build.gradle.run.forge.ForgeData
@@ -52,6 +53,7 @@ tasks.named(sourceSets.forge.getProcessResourcesTaskName(), ProcessResources).co
             mod_id: mod_id,
             mod_name: mod_name,
             mod_version: mod_version,
+            mod_authors: mod_authors,
     ]
 
     inputs.properties replaceProperties
@@ -62,19 +64,23 @@ tasks.named(sourceSets.forge.getProcessResourcesTaskName(), ProcessResources).co
     }
 }
 
-//tasks.named('jar', Jar).configure {
-//    manifest {
-//        attributes([
-//                "Specification-Title": mod_id,
-//                "Specification-Vendor": mod_authors,
-//                "Specification-Version": "1", // We are version 1 of ourselves
-//                "Implementation-Title": project.name,
-//                "Implementation-Version": project.jar.archiveVersion,
-//                "Implementation-Vendor": mod_authors,
-//                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-//        ])
-//    }
-//}
+tasks.named('forgeJar', org.gradle.jvm.tasks.Jar).configure {
+    manifest {
+        attributes([
+                "Specification-Title": mod_id,
+                "Specification-Vendor": mod_authors,
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.jar.archiveVersion,
+                "Implementation-Vendor": mod_authors,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+tasks.named('reobfForgeJar', ReobfTask) {
+    outputJar = project.layout.buildDirectory.file("libs/${base.archivesName.get()}-forge-${project.version}-reobf.jar")
+}
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
