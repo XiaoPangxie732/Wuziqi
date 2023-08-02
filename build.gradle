@@ -83,6 +83,11 @@ tasks.named('reobfForgeJar', ReobfTask) {
     outputJar = project.layout.buildDirectory.file("libs/${base.archivesName.get()}-forge-${project.version}-reobf.jar")
 }
 
+assemble.dependsOn(tasks.register('reobfForgeJarWrapper', Jar) {
+    (archiveFile as RegularFileProperty).set(tasks.named('reobfForgeJar', ReobfTask).flatMap(ReobfTask.&getOutputJar))
+    setActions(List.of())
+})
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
