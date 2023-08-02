@@ -18,9 +18,7 @@ public class SimplifiedChineseProvider extends AbstractLangProvider {
         addBlock(BlockRegistry.OAK_BOARD, "橡木棋盘");
 
         addPrepareMatchScreen();
-        add(I18nUtil.make("block_entity", "board.your_turn"), "您");
-        add(I18nUtil.make("block_entity", "board.opponents_turn"), "对手");
-        add(I18nUtil.make("block_entity", "board.status"), "轮到 %s 下棋");
+        add(I18nUtil.make("block_entity", "board.your_turn"), "轮到您落子");
         add(I18nUtil.make("block_entity", "board.win.white"), "白方获胜");
         add(I18nUtil.make("block_entity", "board.win.black"), "黑方获胜");
     }

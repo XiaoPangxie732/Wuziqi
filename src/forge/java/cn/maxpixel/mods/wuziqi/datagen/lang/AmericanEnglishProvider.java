@@ -18,9 +18,7 @@ public class AmericanEnglishProvider extends AbstractLangProvider {
         addBlock(BlockRegistry.OAK_BOARD, "Oak board");
 
         addPrepareMatchScreen();
-        add(I18nUtil.make("block_entity", "board.your_turn"), "You");
-        add(I18nUtil.make("block_entity", "board.opponents_turn"), "Opponent");
-        add(I18nUtil.make("block_entity", "board.status"), "It's the turn for: %s");
+        add(I18nUtil.make("block_entity", "board.your_turn"), "It's your turn");
         add(I18nUtil.make("block_entity", "board.win.white"), "White win");
         add(I18nUtil.make("block_entity", "board.win.black"), "Black win");
     }

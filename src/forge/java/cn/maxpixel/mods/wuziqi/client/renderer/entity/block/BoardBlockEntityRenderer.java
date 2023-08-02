@@ -34,7 +34,6 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     private static final float GRID_POS_MIN = getPos(0);
     private static final float GRID_POS_MAX = getPos(Board.BOARD_SIZE - 1);
     private static final Component YOUR_TURN = Component.translatable(I18nUtil.make("block_entity", "board.your_turn"));
-    private static final Component OPPONENTS_TURN = Component.translatable(I18nUtil.make("block_entity", "board.opponents_turn"));
 
     private final BlockEntityRendererProvider.Context context;
     public BoardBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -70,8 +69,9 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
         pose.popPose();
         if (blockEntity.isMatching()) {
             renderIndicator(pose, blockEntity);
-            renderStatus(pose, Component.translatable(I18nUtil.make("block_entity", "board.status"),
-                    blockEntity.isTurnFor(Minecraft.getInstance().player) ? YOUR_TURN : OPPONENTS_TURN), buffer, packedLight);
+            if (blockEntity.isTurnFor(Minecraft.getInstance().player)) {
+                renderStatus(pose, YOUR_TURN, buffer, packedLight);
+            }
         }
         pose.popPose();
     }
