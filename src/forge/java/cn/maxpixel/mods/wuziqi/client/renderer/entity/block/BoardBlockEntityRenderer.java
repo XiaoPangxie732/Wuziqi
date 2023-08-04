@@ -29,13 +29,13 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     private static final int INDICATOR_COLOR = 0xFFFFFFFF;
     private static final int INDICATOR_DISABLED_COLOR = 0xFFD02525;
     private static final int GRID_COLOR = 0xFF000000;
-    private static final float GRID_WIDTH_HALF = .005f;
+    private static final float GRID_WIDTH_HALF = .002f;
     private static final float GRID_HEIGHT = 1.f / BLOCK_LENGTH + .001f;
     private static final float GRID_POS_MIN = getPos(0);
     private static final float GRID_POS_MAX = getPos(Board.BOARD_SIZE - 1);
     private static final Component YOUR_TURN = Component.translatable(I18nUtil.make("block_entity", "board.your_turn"));
-    private static final float scaleFactor = 0.5f;
-    private static final float heightScale = 0.5f;
+    private static final float SCALE_FACTOR = 0.6f;
+    private static final float HEIGHT_SCALE = 0.5f;
 
     private final BlockEntityRendererProvider.Context context;
     public BoardBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -46,15 +46,14 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     public void render(BoardBlockEntity blockEntity, float partialTick, PoseStack pose, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         renderLines(pose);
         pose.pushPose();
-        pose.translate(-(1.f / BLOCK_LENGTH / 2 * scaleFactor), 1.f / BLOCK_LENGTH + 1, -(1.f / BLOCK_LENGTH / 2 * scaleFactor));
+        pose.translate(-(1.f / BLOCK_LENGTH / 2 * SCALE_FACTOR), 1.f / BLOCK_LENGTH, -(1.f / BLOCK_LENGTH / 2 * SCALE_FACTOR));
         var render = context.getBlockRenderDispatcher();
         for (int x = 0; x < Board.BOARD_SIZE; x++) {
             for (int z = 0; z < Board.BOARD_SIZE; z++) {
                 pose.pushPose();
                 pose.translate(getPos(x), 0, getPos(z));
-                var scale = 1.f / BLOCK_LENGTH * scaleFactor;
-                pose.scale(scale, scale, scale);
-                pose.scale(1.0f,heightScale,1.0f);
+                var scale = 1.f / BLOCK_LENGTH * SCALE_FACTOR;
+                pose.scale(scale, scale * HEIGHT_SCALE, scale);
                 var piece = blockEntity.getBoard().getPiece(x, z);
                 if (piece != null) {
                     switch (piece) {

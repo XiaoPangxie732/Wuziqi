@@ -10,6 +10,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.PlayerModelPart;
 
 public class PlayerSelectionList extends ObjectSelectionList<PlayerSelectionList.Entry> {
+    private final int playersLength = minecraft.font.width(PrepareMatchScreen.PLAYERS);
+
     public PlayerSelectionList(Minecraft mc, int width, int height, int contentBegin, int contentEnd, int itemHeight) {
         super(mc, width, height, contentBegin, contentEnd, itemHeight);
     }
@@ -31,7 +33,7 @@ public class PlayerSelectionList extends ObjectSelectionList<PlayerSelectionList
 
     @Override
     protected void renderHeader(GuiGraphics graphics, int left, int height) {
-        graphics.drawString(minecraft.font, PrepareMatchScreen.PLAYERS, left + width / 2 - minecraft.font.width(PrepareMatchScreen.PLAYERS) / 2, height, 0xFFFFFF);
+        graphics.drawString(minecraft.font, PrepareMatchScreen.PLAYERS, x0 + width / 2 - playersLength / 2, height, 0xFFFFFF, false);
     }
 
     public class Entry extends ObjectSelectionList.Entry<Entry> {

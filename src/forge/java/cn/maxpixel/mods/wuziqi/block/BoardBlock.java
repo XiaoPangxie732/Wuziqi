@@ -64,7 +64,10 @@ public class BoardBlock extends BaseEntityBlock {
                 }
                 var loc = hitResult.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
                 if (!checkHitLocation(loc)) return InteractionResult.PASS;
-                Network.CHANNEL.sendToServer(new ServerboundPiecePacket(pos, ServerboundPiecePacket.Action.PLACE, (byte) getPos(loc.x), (byte) getPos(loc.z)));
+                int x = getPos(loc.x);
+                int z = getPos(loc.z);
+                if (blockEntity.getBoard().hasPiece(x, z)) return InteractionResult.PASS;
+                Network.CHANNEL.sendToServer(new ServerboundPiecePacket(pos, ServerboundPiecePacket.Action.PLACE, (byte) x, (byte) z));
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
