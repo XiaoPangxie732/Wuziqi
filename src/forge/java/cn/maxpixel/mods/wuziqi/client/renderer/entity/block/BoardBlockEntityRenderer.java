@@ -34,6 +34,8 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     private static final float GRID_POS_MIN = getPos(0);
     private static final float GRID_POS_MAX = getPos(Board.BOARD_SIZE - 1);
     private static final Component YOUR_TURN = Component.translatable(I18nUtil.make("block_entity", "board.your_turn"));
+    private static final float scaleFactor = 0.5f;
+    private static final float heightScale = 0.5f;
 
     private final BlockEntityRendererProvider.Context context;
     public BoardBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -42,18 +44,17 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
 
     @Override
     public void render(BoardBlockEntity blockEntity, float partialTick, PoseStack pose, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        pose.pushPose();
-        pose.scale(1.f, 1.f, 1.f);
         renderLines(pose);
         pose.pushPose();
-        pose.translate(-(1.f / BLOCK_LENGTH / 2), 1.f / BLOCK_LENGTH, -(1.f / BLOCK_LENGTH / 2));
+        pose.translate(-(1.f / BLOCK_LENGTH / 2 * scaleFactor), 1.f / BLOCK_LENGTH + 1, -(1.f / BLOCK_LENGTH / 2 * scaleFactor));
         var render = context.getBlockRenderDispatcher();
         for (int x = 0; x < Board.BOARD_SIZE; x++) {
             for (int z = 0; z < Board.BOARD_SIZE; z++) {
                 pose.pushPose();
-                pose.translate(getPos(x), -.5f / BLOCK_LENGTH, getPos(z));
-                var scale = 1.f / BLOCK_LENGTH;
+                pose.translate(getPos(x), 0, getPos(z));
+                var scale = 1.f / BLOCK_LENGTH * scaleFactor;
                 pose.scale(scale, scale, scale);
+                pose.scale(1.0f,heightScale,1.0f);
                 var piece = blockEntity.getBoard().getPiece(x, z);
                 if (piece != null) {
                     switch (piece) {
@@ -73,7 +74,6 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
                 renderStatus(pose, YOUR_TURN, buffer, packedLight);
             }
         }
-        pose.popPose();
     }
 
     private static void renderLines(PoseStack poseStack) {
@@ -98,17 +98,17 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     }
 
     private static void renderZAxisLine(Matrix4f pose, BufferBuilder consumer, float x) {
-        consumer.vertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
     }
 
     private static void renderXAxisLine(Matrix4f pose, BufferBuilder consumer, float z) {
-        consumer.vertex(pose, GRID_POS_MIN, GRID_HEIGHT, z - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, GRID_POS_MIN, GRID_HEIGHT, z + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, GRID_POS_MAX, GRID_HEIGHT, z + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, GRID_POS_MAX, GRID_HEIGHT, z - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, GRID_POS_MIN - GRID_WIDTH_HALF, GRID_HEIGHT, z - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, GRID_POS_MIN - GRID_WIDTH_HALF, GRID_HEIGHT, z + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, GRID_POS_MAX + GRID_WIDTH_HALF, GRID_HEIGHT, z + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.vertex(pose, GRID_POS_MAX + GRID_WIDTH_HALF, GRID_HEIGHT, z - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
     }
 
     private static void renderIndicator(PoseStack poseStack, BoardBlockEntity blockEntity) {
