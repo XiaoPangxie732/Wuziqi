@@ -6,7 +6,9 @@ import cn.maxpixel.mods.wuziqi.network.Network;
 import cn.maxpixel.mods.wuziqi.network.serverbound.ServerboundPiecePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -50,6 +52,19 @@ public class BoardBlock extends BaseEntityBlock {
     @Override
     public BlockState updateShape(BlockState p_60541_, Direction p_60542_, BlockState p_60543_, LevelAccessor p_60544_, BlockPos p_60545_, BlockPos p_60546_) {
         return super.updateShape(p_60541_, p_60542_, p_60543_, p_60544_, p_60545_, p_60546_);// TODO: big boards
+    }
+
+    @Override
+    public void randomTick(BlockState p_222954_, ServerLevel p_222955_, BlockPos p_222956_, RandomSource p_222957_) {
+        // generally this wouldn't be called
+        // just in case, leave this noop
+    }
+
+    @Override
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {// see BoardBlockEntity.startMatch
+        if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity be) {
+            be.endMatch();
+        }
     }
 
     @Override

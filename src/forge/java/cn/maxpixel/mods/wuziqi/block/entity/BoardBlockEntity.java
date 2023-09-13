@@ -94,6 +94,7 @@ public class BoardBlockEntity extends BlockEntity {
         dividePlayers();
         nextTurn();
         setMatching(true);
+        level.scheduleTick(getBlockPos(), getBlockState().getBlock(), 600 * 20);
     }
 
     @UsedOn(UsedOn.Side.SERVER)
