@@ -1,7 +1,7 @@
 package cn.maxpixel.mods.wuziqi.registry;
 
 import cn.maxpixel.mods.wuziqi.network.Network;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 public class Registries {
     public static void register(IEventBus modBus) {

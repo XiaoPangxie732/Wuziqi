@@ -1,27 +1,11 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net/' }
-        maven {
-            name = 'Minecraft Decompiler'
-            url = 'https://maven.pkg.github.com/MaxPixelStudios/MinecraftDecompiler'
-            credentials {
-                username = System.getenv("GHP_USERNAME") ?: System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GHP_TOKEN") ?: System.getenv("GITHUB_TOKEN")
-            }
-            content {
-                includeModule('cn.maxpixel', 'minecraft-decompiler')
-            }
-        }
-        maven {
-            name = 'Piston Gradle'
-            url = 'https://maven.pkg.github.com/PistonMinecraft/PistonGradle'
-            credentials {
-                username = System.getenv("GHP_USERNAME") ?: System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GHP_TOKEN") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
+        maven { url = 'https://maven.neoforged.net/releases' }
     }
 }
 
-rootProject.name = 'Wuziqi'
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
