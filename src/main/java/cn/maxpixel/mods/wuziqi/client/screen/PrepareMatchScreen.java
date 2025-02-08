@@ -1,8 +1,7 @@
 package cn.maxpixel.mods.wuziqi.client.screen;
 
 import cn.maxpixel.mods.wuziqi.block.entity.BoardBlockEntity;
-import cn.maxpixel.mods.wuziqi.network.Network;
-import cn.maxpixel.mods.wuziqi.network.serverbound.ServerboundPrepareMatchPacket;
+import cn.maxpixel.mods.wuziqi.network.serverbound.PrepareMatchPacket;
 import cn.maxpixel.mods.wuziqi.util.I18nUtil;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,6 +9,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.UUID;
 
@@ -38,9 +38,9 @@ public class PrepareMatchScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
         graphics.drawCenteredString(font, WUZIQI, this.width / 2, 20, 0xFFFFFF);
-        graphics.fill(queuedPlayers.getLeft(), queuedPlayers.getTop(), queuedPlayers.getRight(), queuedPlayers.getBottom(), 0xE0101010);// background for queuedPlayers
+        graphics.fill(queuedPlayers.getRowLeft(), queuedPlayers.getBottom() - queuedPlayers.getHeight(), queuedPlayers.getRight(), queuedPlayers.getBottom(), 0xE0101010);// background for queuedPlayers
+        renderBackground(graphics,mouseX,mouseY,partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
@@ -60,27 +60,25 @@ public class PrepareMatchScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        Network.CHANNEL.sendToServer(new ServerboundPrepareMatchPacket(ServerboundPrepareMatchPacket.Action.SYNC, blockEntity.getBlockPos()));
-        this.queuedPlayers = new PlayerSelectionList(minecraft, WIDTH, 40, 40, 160, 20);
-        queuedPlayers.setLeftPos(width / 2 - WIDTH / 2);
-        queuedPlayers.setRenderBackground(false);
-        queuedPlayers.setRenderTopAndBottom(false);
+        PacketDistributor.sendToServer(new PrepareMatchPacket(PrepareMatchPacket.Action.SYNC, blockEntity.getBlockPos()));
+        this.queuedPlayers = new PlayerSelectionList(minecraft, WIDTH, 80, 40, 160, 20);
+        queuedPlayers.setPosition(width / 2 - WIDTH / 2,40);
         queuedPlayers.setRenderHeader(true, 20);
         addRenderableWidget(queuedPlayers);
 
         this.toggleJoin = Button.builder(JOIN, button -> {
             if (joined) {
                 joined = false;
-                Network.CHANNEL.sendToServer(new ServerboundPrepareMatchPacket(ServerboundPrepareMatchPacket.Action.QUIT, blockEntity.getBlockPos()));
+                PacketDistributor.sendToServer(new PrepareMatchPacket(PrepareMatchPacket.Action.QUIT, blockEntity.getBlockPos()));
             } else {
                 joined = true;
-                Network.CHANNEL.sendToServer(new ServerboundPrepareMatchPacket(ServerboundPrepareMatchPacket.Action.JOIN, blockEntity.getBlockPos()));
+                PacketDistributor.sendToServer(new PrepareMatchPacket(PrepareMatchPacket.Action.JOIN, blockEntity.getBlockPos()));
             }
         }).pos(width / 2 - 150 - 1, 170).build();
         addRenderableWidget(toggleJoin);
 
         this.startMatch = Button.builder(START, button -> {
-            Network.CHANNEL.sendToServer(new ServerboundPrepareMatchPacket(ServerboundPrepareMatchPacket.Action.START, blockEntity.getBlockPos()));
+            PacketDistributor.sendToServer(new PrepareMatchPacket(PrepareMatchPacket.Action.START, blockEntity.getBlockPos()));
             onClose();
         }).pos(width / 2 + 1, 170).build();
         addRenderableWidget(startMatch);
@@ -90,7 +88,7 @@ public class PrepareMatchScreen extends Screen {
         var list = queuedPlayers.children();
         list.clear();
         for (UUID uuid : players) {
-            if (minecraft.level.getPlayerByUUID(uuid) instanceof AbstractClientPlayer player) {
+            if (minecraft != null && minecraft.level != null && minecraft.level.getPlayerByUUID(uuid) instanceof AbstractClientPlayer player) {
                 if (player == minecraft.player) joined = true;
                 list.add(queuedPlayers.new Entry(player, minecraft));
             }

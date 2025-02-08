@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL46;
 
@@ -69,7 +69,7 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
         pose.popPose();
         if (blockEntity.isMatching()) {
             renderIndicator(pose, blockEntity);
-            if (blockEntity.isTurnFor(Minecraft.getInstance().player)) {
+            if (Minecraft.getInstance().player != null && blockEntity.isTurnFor(Minecraft.getInstance().player)) {
                 renderStatus(pose, YOUR_TURN, buffer, packedLight);
             }
         }
@@ -78,17 +78,16 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     private static void renderLines(PoseStack poseStack) {
         Matrix4f pose = poseStack.last().pose();
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder builder = tesselator.getBuilder();
+        BufferBuilder builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         var depthState = GL46.glGetBoolean(GL46.GL_DEPTH_TEST);
         if (!depthState) RenderSystem.enableDepthTest();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         for (int i = 0; i < Board.BOARD_SIZE; i++) {
             float pos = getPos(i);
             renderZAxisLine(pose, builder, pos);
             renderXAxisLine(pose, builder, pos);
         }
-        tesselator.end();
+        BufferUploader.drawWithShader(builder.buildOrThrow());
         if (!depthState) RenderSystem.disableDepthTest();
     }
 
@@ -97,17 +96,17 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
     }
 
     private static void renderZAxisLine(Matrix4f pose, BufferBuilder consumer, float x) {
-        consumer.vertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.addVertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN - GRID_WIDTH_HALF).setColor(GRID_COLOR);
+        consumer.addVertex(pose, x - GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX + GRID_WIDTH_HALF).setColor(GRID_COLOR);
+        consumer.addVertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MAX + GRID_WIDTH_HALF).setColor(GRID_COLOR);
+        consumer.addVertex(pose, x + GRID_WIDTH_HALF, GRID_HEIGHT, GRID_POS_MIN - GRID_WIDTH_HALF).setColor(GRID_COLOR);
     }
 
     private static void renderXAxisLine(Matrix4f pose, BufferBuilder consumer, float z) {
-        consumer.vertex(pose, GRID_POS_MIN - GRID_WIDTH_HALF, GRID_HEIGHT, z - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, GRID_POS_MIN - GRID_WIDTH_HALF, GRID_HEIGHT, z + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, GRID_POS_MAX + GRID_WIDTH_HALF, GRID_HEIGHT, z + GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
-        consumer.vertex(pose, GRID_POS_MAX + GRID_WIDTH_HALF, GRID_HEIGHT, z - GRID_WIDTH_HALF).color(GRID_COLOR).endVertex();
+        consumer.addVertex(pose, GRID_POS_MIN - GRID_WIDTH_HALF, GRID_HEIGHT, z - GRID_WIDTH_HALF).setColor(GRID_COLOR);
+        consumer.addVertex(pose, GRID_POS_MIN - GRID_WIDTH_HALF, GRID_HEIGHT, z + GRID_WIDTH_HALF).setColor(GRID_COLOR);
+        consumer.addVertex(pose, GRID_POS_MAX + GRID_WIDTH_HALF, GRID_HEIGHT, z + GRID_WIDTH_HALF).setColor(GRID_COLOR);
+        consumer.addVertex(pose, GRID_POS_MAX + GRID_WIDTH_HALF, GRID_HEIGHT, z - GRID_WIDTH_HALF).setColor(GRID_COLOR);
     }
 
     private static void renderIndicator(PoseStack poseStack, BoardBlockEntity blockEntity) {
@@ -118,7 +117,7 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
         if (hr == null || hr.getType() != HitResult.Type.BLOCK) return;
         var blockHitResult = ((BlockHitResult) hr);
         var blockPos = blockHitResult.getBlockPos();
-        if (level.getExistingBlockEntity(blockPos) == blockEntity) {
+        if (level.getBlockEntity(blockPos) == blockEntity) {
             var loc = blockHitResult.getLocation().subtract(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             if (!BoardBlock.checkHitLocation(loc)) return;
             int boardX = BoardBlock.getPos(loc.x);
@@ -131,9 +130,8 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
 
             // draw begin
             Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder builder = tesselator.getBuilder();
+            BufferBuilder builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
 
             // fill vertex
             float eachRadius = (float) (Math.PI * 2 / FRAGMENTS);
@@ -141,13 +139,13 @@ public class BoardBlockEntityRenderer implements BlockEntityRenderer<BoardBlockE
             for (int i = 0; i < FRAGMENTS; i++) {
                 var currentRadius = eachRadius * i;
                 var nextRadius = eachRadius * (i + 1);
-                builder.vertex(pose, 0, 0, 0).color(indicatorColor).endVertex();
-                builder.vertex(pose, (float) (RADIUS * Math.cos(nextRadius)), 0, (float) (RADIUS * Math.sin(nextRadius))).color(indicatorColor).endVertex();
-                builder.vertex(pose, (float) (RADIUS * Math.cos(currentRadius)), 0, (float) (RADIUS * Math.sin(currentRadius))).color(indicatorColor).endVertex();
+                builder.addVertex(pose, 0, 0, 0).setColor(indicatorColor);
+                builder.addVertex(pose, (float) (RADIUS * Math.cos(nextRadius)), 0, (float) (RADIUS * Math.sin(nextRadius))).setColor(indicatorColor);
+                builder.addVertex(pose, (float) (RADIUS * Math.cos(currentRadius)), 0, (float) (RADIUS * Math.sin(currentRadius))).setColor(indicatorColor);
             }
 
             // end
-            tesselator.end();
+            BufferUploader.drawWithShader(builder.buildOrThrow());
             poseStack.popPose();
         }
     }

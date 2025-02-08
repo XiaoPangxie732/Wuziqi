@@ -3,13 +3,13 @@ package cn.maxpixel.mods.wuziqi.block.entity;
 import cn.maxpixel.mods.wuziqi.annotations.UsedOn;
 import cn.maxpixel.mods.wuziqi.board.Board;
 import cn.maxpixel.mods.wuziqi.board.PieceType;
-import cn.maxpixel.mods.wuziqi.network.Network;
-import cn.maxpixel.mods.wuziqi.network.clientbound.ClientboundUpdatePlayersPacket;
+import cn.maxpixel.mods.wuziqi.network.clientbound.UpdatePlayersPacket;
 import cn.maxpixel.mods.wuziqi.registry.BlockEntityRegistry;
 import cn.maxpixel.mods.wuziqi.util.I18nUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -17,18 +17,20 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BoardBlockEntity extends BlockEntity {
     public static final String BOARD_KEY = "Board";
@@ -51,6 +53,17 @@ public class BoardBlockEntity extends BlockEntity {
 
     public BoardBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.BOARD.get(), pos, state);
+    }
+
+    private static void putPlayerList(CompoundTag tag, @Nullable Set<Player> set, String key) {
+        if (set != null && !set.isEmpty()) {
+            CompoundTag compound = new CompoundTag();
+            var list = List.copyOf(set);
+            for (int i = 0; i < set.size(); i++) {
+                compound.putUUID(String.valueOf(i), list.get(i).getUUID());
+            }
+            tag.put(key, compound);
+        }
     }
 
     public Board getBoard() {
@@ -83,8 +96,10 @@ public class BoardBlockEntity extends BlockEntity {
     @UsedOn(UsedOn.Side.SERVER)
     public void syncJoinedPlayers() {
         var pos = getBlockPos().getCenter();
-        Network.CHANNEL.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.x, pos.y, pos.z, 10., level.dimension())),
-                new ClientboundUpdatePlayersPacket(joinedPlayers.stream().map(ServerPlayer::getUUID).toArray(UUID[]::new)));
+        if (level instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersInDimension(serverLevel,
+                    new UpdatePlayersPacket(joinedPlayers.stream().map(ServerPlayer::getUUID).collect(Collectors.toCollection(ArrayList::new))));
+        }
     }
 
     @UsedOn(UsedOn.Side.SERVER)
@@ -165,8 +180,8 @@ public class BoardBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider pRegistries) {
+        super.loadAdditional(tag, pRegistries);
         if (tag.getBoolean(CLEAR_KEY)) {
             this.board = null;
             this.matching = false;
@@ -193,8 +208,8 @@ public class BoardBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider pRegistries) {
+        super.saveAdditional(tag, pRegistries);
         if (board != null) {
             tag.put(BOARD_KEY, board.save());
         }
@@ -207,8 +222,8 @@ public class BoardBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider pRegistries) {
+        CompoundTag tag = saveWithoutMetadata(pRegistries);
         if (matchJustEnded) {
             tag.putBoolean(CLEAR_KEY, true);
             this.matchJustEnded = false;
@@ -222,17 +237,6 @@ public class BoardBlockEntity extends BlockEntity {
         putPlayerList(tag, white, WHITE_KEY);
         putPlayerList(tag, black, BLACK_KEY);
         return tag;
-    }
-
-    private static void putPlayerList(CompoundTag tag, @Nullable Set<Player> set, String key) {
-        if (set != null && !set.isEmpty()) {
-            CompoundTag compound = new CompoundTag();
-            var list = List.copyOf(set);
-            for (int i = 0; i < set.size(); i++) {
-                compound.putUUID(String.valueOf(i), list.get(i).getUUID());
-            }
-            tag.put(key, compound);
-        }
     }
 
     private Set<Player> getPlayerList(CompoundTag tag, String key) {

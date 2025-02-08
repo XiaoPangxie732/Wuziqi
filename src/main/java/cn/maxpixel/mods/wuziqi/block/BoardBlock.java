@@ -2,16 +2,17 @@ package cn.maxpixel.mods.wuziqi.block;
 
 import cn.maxpixel.mods.wuziqi.block.entity.BoardBlockEntity;
 import cn.maxpixel.mods.wuziqi.client.screen.Screens;
-import cn.maxpixel.mods.wuziqi.network.Network;
-import cn.maxpixel.mods.wuziqi.network.serverbound.ServerboundPiecePacket;
+import cn.maxpixel.mods.wuziqi.network.serverbound.PiecePacket;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -23,13 +24,20 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 public class BoardBlock extends BaseEntityBlock {
     private static final VoxelShape SHAPE = box(1, 0, 1, 15, 1, 15);
+    private static final MapCodec<BoardBlock> CODEC = simpleCodec(BoardBlock::new);
 
     public BoardBlock(Properties prop) {
         super(prop);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Nullable
@@ -62,31 +70,30 @@ public class BoardBlock extends BaseEntityBlock {
 
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {// see BoardBlockEntity.startMatch
-        if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity be) {
+        if (level.getBlockEntity(pos) instanceof BoardBlockEntity be) {
             be.endMatch();
         }
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (hand == InteractionHand.OFF_HAND) return InteractionResult.PASS;
-        if (level.getExistingBlockEntity(pos) instanceof BoardBlockEntity blockEntity) {
+    public ItemInteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (hand == InteractionHand.OFF_HAND) return ItemInteractionResult.CONSUME;
+        if (level.getBlockEntity(pos) instanceof BoardBlockEntity blockEntity) {
             if (level.isClientSide) {
                 if (!blockEntity.isMatching()) {
                     Screens.openPrepareMatchScreen(blockEntity);
-                    return InteractionResult.SUCCESS;
+                    return ItemInteractionResult.SUCCESS;
                 }
-                var loc = hitResult.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
-                if (!checkHitLocation(loc)) return InteractionResult.PASS;
+                var loc = hit.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
+                if (!checkHitLocation(loc)) return ItemInteractionResult.CONSUME;
                 int x = getPos(loc.x);
                 int z = getPos(loc.z);
-                if (blockEntity.getBoard().hasPiece(x, z)) return InteractionResult.PASS;
-                Network.CHANNEL.sendToServer(new ServerboundPiecePacket(pos, ServerboundPiecePacket.Action.PLACE, (byte) x, (byte) z));
+                if (blockEntity.getBoard().hasPiece(x, z)) return ItemInteractionResult.CONSUME;
+                PacketDistributor.sendToServer(new PiecePacket(pos, PiecePacket.Action.PLACE, (byte) x, (byte) z));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        return InteractionResult.PASS;
+        return ItemInteractionResult.CONSUME;
     }
 
     public static boolean checkHitLocation(Vec3 loc) {

@@ -12,16 +12,15 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
 public class BlockRegistry {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, WuziqiMod.MODID);
+    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(WuziqiMod.MODID);
 
-    public static final RegistryObject<Block> OAK_BOARD = registerWithItem("oak_board", () -> new BoardBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<Block> OAK_BOARD = registerWithItem("oak_board", () -> new BoardBlock(BlockBehaviour.Properties.of()
             .strength(2.0F, 3.0F)
             .noOcclusion()
             .sound(SoundType.WOOD)
@@ -31,12 +30,12 @@ public class BlockRegistry {
             .isSuffocating(BlockRegistry::never)
             .ignitedByLava()));
 
-    private static <T extends Block> RegistryObject<T> registerWithItem(String name, Supplier<T> supplier) {
+    private static <T extends Block> DeferredBlock<T> registerWithItem(String name, Supplier<T> supplier) {
         return registerWithItem(name, supplier, Item.Properties::new);
     }
 
-    private static <T extends Block> RegistryObject<T> registerWithItem(String name, Supplier<T> supplier, Supplier<Item.Properties> itemProp) {
-        RegistryObject<T> obj = BLOCKS.register(name, supplier);
+    private static <T extends Block> DeferredBlock<T> registerWithItem(String name, Supplier<T> supplier, Supplier<Item.Properties> itemProp) {
+        DeferredBlock<T> obj = BLOCKS.register(name, supplier);
         ItemRegistry.ITEMS.register(name, () -> new BlockItem(obj.get(), itemProp.get()));
         return obj;
     }

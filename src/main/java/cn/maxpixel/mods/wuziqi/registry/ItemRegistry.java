@@ -1,10 +1,8 @@
 package cn.maxpixel.mods.wuziqi.registry;
 
 import cn.maxpixel.mods.wuziqi.WuziqiMod;
-import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ItemRegistry {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, WuziqiMod.MODID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(WuziqiMod.MODID);
 }

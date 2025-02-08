@@ -18,6 +18,6 @@ public class WuziqiMod {
     }
 
     public static ResourceLocation rl(String path) {
-        return new ResourceLocation(WuziqiMod.MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(WuziqiMod.MODID, path);
     }
 }

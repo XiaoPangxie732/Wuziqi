@@ -13,7 +13,7 @@ public class PlayerSelectionList extends ObjectSelectionList<PlayerSelectionList
     private final int playersLength = minecraft.font.width(PrepareMatchScreen.PLAYERS);
 
     public PlayerSelectionList(Minecraft mc, int width, int height, int contentBegin, int contentEnd, int itemHeight) {
-        super(mc, width, height, contentBegin, contentEnd, itemHeight);
+        super(mc, width, contentEnd, contentBegin, itemHeight);
     }
 
     @Override
@@ -26,14 +26,24 @@ public class PlayerSelectionList extends ObjectSelectionList<PlayerSelectionList
         return 290;
     }
 
+    //TODO : x0被移除了
     @Override
     protected int getScrollbarPosition() {
-        return x0 + width;
+        return width;
     }
 
     @Override
     protected void renderHeader(GuiGraphics graphics, int left, int height) {
-        graphics.drawString(minecraft.font, PrepareMatchScreen.PLAYERS, x0 + width / 2 - playersLength / 2, height, 0xFFFFFF, false);
+        graphics.drawString(minecraft.font, PrepareMatchScreen.PLAYERS,  width / 2 - playersLength / 2, height, 0xFFFFFF, false);
+    }
+
+    @Override
+    protected void renderListBackground(GuiGraphics guiGraphics) {
+
+    }
+
+    protected void renderListSeparators(GuiGraphics guiGraphics) {
+
     }
 
     public class Entry extends ObjectSelectionList.Entry<Entry> {
@@ -58,7 +68,7 @@ public class PlayerSelectionList extends ObjectSelectionList<PlayerSelectionList
 
         @Override
         public void render(GuiGraphics graphics, int index, int topPos, int leftPos, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTick) {
-            PlayerFaceRenderer.draw(graphics, player.getSkinTextureLocation(), leftPos, topPos, 16, player.isModelPartShown(PlayerModelPart.HAT),
+            PlayerFaceRenderer.draw(graphics, player.getSkin().texture(), leftPos, topPos, 16, player.isModelPartShown(PlayerModelPart.HAT),
                     LivingEntityRenderer.isEntityUpsideDown(player));
             graphics.drawString(mc.font, player.getDisplayName(), leftPos + 16 + 5, topPos + mc.font.lineHeight / 2, 0xFFFFFF);
         }
