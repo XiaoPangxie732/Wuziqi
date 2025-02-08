@@ -45,7 +45,8 @@ authors="${mod_authors}" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Play Wuziqi in Minecraft'''
+Play Wuziqi in Minecraft
+Ported to 1.21 by Crystal1921'''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
 #[[mixins]]
